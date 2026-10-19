@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>校內集章抽獎系統</title>
+  <!-- 引入 Bootstrap 5 CSS 樣式庫 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: "Microsoft JhengHei", sans-serif;
+    }
+    .card {
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .btn-primary {
+      background-color: #0d6efd;
+      border: none;
+      padding: 12px;
+      font-size: 1.1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        
+        <!-- 標題卡片 -->
+        <div class="text-center mb-4">
+          <h2 class="fw-bold text-primary">🎉 校內集章抽獎活動</h2>
+          <p class="text-muted">請填寫基本資料以驗證抽獎資格（一學號限抽一次）</p>
+        </div>
+
+        <!-- 學生表單卡片 -->
+        <div class="card p-4">
+          <form id="studentForm">
+            <div class="mb-3">
+              <label for="student_id" class="form-label fw-bold">學號 <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="student_id" placeholder="例如：S112001" required>
+            </div>
+
+            <div class="mb-3">
+              <label for="name" class="form-label fw-bold">姓名 <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="name" placeholder="例如：王小明" required>
+            </div>
+
+            <div class="mb-3">
+              <label for="grade" class="form-label fw-bold">年級</label>
+              <select class="form-select" id="grade">
+                <option value="大一">大一</option>
+                <option value="大二">大二</option>
+                <option value="大三">大三</option>
+                <option value="大四">大四</option>
+                <option value="碩博士">碩博士</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label for="department" class="form-label fw-bold">科系/系所</label>
+              <input type="text" class="form-control" id="department" placeholder="例如：資訊管理學系">
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 fw-bold mt-2" id="submitBtn">
+              驗證資格並前往抽獎 ➔
+            </button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ⚠️ 請在此處貼上您的 Google Apps Script Web 應用程式 URL
+    const API_URL = "https://script.google.com/macros/s/AKfycbxFGr_HFTpj04n3Vs9iC-9_4DrH6HW47ktu3LSR1NmMz9Flzk2SNFTAs1yp2QhU8oGN/exec";
+
+    const form = document.getElementById('studentForm');
+    const submitBtn = document.getElementById('submitBtn');
+
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const studentId = document.getElementById('student_id').value.trim();
+      const name = document.getElementById('name').value.trim();
+      const grade = document.getElementById('grade').value;
+      const department = document.getElementById('department').value.trim();
+
+      if (!studentId || !name) {
+        alert("請填寫完整的學號與姓名！");
+        return;
+      }
+
+      // 按鈕顯示載入狀態
+      submitBtn.disabled = true;
+      submitBtn.innerText = "驗證資格中...";
+
+      try {
+        // 發送 GET 請求檢查學號資格
+        const res = await fetch(`${API_URL}?action=checkStudent&student_id=${encodeURIComponent(studentId)}`);
+        const data = await res.json();
+
+        if (data.status === "already_drawn") {
+          alert(`⚠️ 驗證失敗：${data.message}`);
+          submitBtn.disabled = false;
+          submitBtn.innerText = "驗證資格並前往抽獎 ➔";
+        } else if (data.status === "eligible") {
+          // 資格符合：將學生基本資料暫存至 sessionStorage 供下頁使用
+          sessionStorage.setItem('student_data', JSON.stringify({
+            student_id: studentId,
+            name: name,
+            grade: grade,
+            department: department
+          }));
+
+          // 跳轉至抽獎頁面
+          window.location.href = "draw.html";
+        } else {
+          alert(`發生錯誤：${data.message}`);
+          submitBtn.disabled = false;
+          submitBtn.innerText = "驗證資格並前往抽獎 ➔";
+        }
+      } catch (err) {
+        alert("連線後端伺服器失敗，請檢查 API 網址！");
+        console.error(err);
+        submitBtn.disabled = false;
+        submitBtn.innerText = "驗證資格並前往抽獎 ➔";
+      }
+    });
+  </script>
+</body>
+</html>

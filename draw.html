@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>線上抽獎 - 校內集章抽獎系統</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: repeating-conic-gradient(from 0deg, #f5f5f5 0deg 15deg, #e0e0e0 15deg 30deg);
+      font-family: "Microsoft JhengHei", sans-serif;
+      min-height: 100vh;
+    }
+    .card {
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      background-color: rgba(255, 255, 255, 0.98);
+    }
+    
+    /* 可愛扭蛋機畫布區塊 */
+    .gachapon-wrapper {
+      position: relative;
+      width: 280px;
+      height: 280px;
+      margin: 10px auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* 扭蛋機圖片外框 */
+    .gachapon-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      transition: transform 0.2s;
+    }
+
+    /* 變矮變胖、變高變瘦重複擠壓動畫 */
+    .squash-animation {
+      animation: squashStretch 0.5s ease-in-out infinite alternate;
+    }
+
+    @keyframes squashStretch {
+      0% {
+        transform: scale(1.05, 0.9) translateY(10px); /* 變矮變胖 */
+      }
+      100% {
+        transform: scale(0.93, 1.08) translateY(-10px); /* 變高變瘦 */
+      }
+    }
+
+    /* 滾出的立體扭蛋殼 (尺寸加大至 260px) */
+    .capsule-box {
+      width: 260px;
+      height: 260px;
+      margin: 10px auto;
+      cursor: pointer;
+      animation: popBounce 1.2s infinite alternate;
+      transition: transform 0.2s;
+    }
+    .capsule-box:hover {
+      transform: scale(1.08);
+    }
+    .capsule-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 10px 15px rgba(0,0,0,0.25));
+    }
+
+    @keyframes popBounce {
+      0% { transform: translateY(0) scale(0.96); }
+      100% { transform: translateY(-15px) scale(1.04); }
+    }
+
+    /* 獎品圖片預覽 */
+    .prize-image {
+      max-width: 100%;
+      max-height: 220px;
+      border-radius: 12px;
+      object-fit: contain;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    /* 學生個人資訊標籤 */
+    .user-info-box {
+      background-color: #f8f9fa;
+      border: 1px dashed #6c757d;
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-weight: bold;
+      color: #333;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+
+        <!-- 區塊 1：可愛扭蛋機抽獎 -->
+        <div id="drawSection" class="card p-4 text-center">
+          <h3 id="studentGreeting" class="fw-bold mb-1 text-danger">載入中...</h3>
+          <p class="text-muted small mb-2">點擊下方按鈕啟動限定扭蛋機！</p>
+
+          <!-- 扭蛋機機器圖片 (gachapon.png) -->
+          <div class="gachapon-wrapper">
+            <img id="gachaponMachine" src="gachapon.png" alt="扭蛋機" class="gachapon-img">
+          </div>
+
+          <button id="drawBtn" class="btn btn-warning btn-lg fw-bold fs-5 py-3 shadow w-100 text-dark">
+            🎁 開始抽獎！
+          </button>
+        </div>
+
+        <!-- 區塊 2：掉出透明扭蛋殼，點擊開啟 -->
+        <div id="ballSection" class="card p-4 text-center d-none">
+          <h3 class="fw-bold text-danger">🎉 扭蛋跑出來囉！</h3>
+          <p class="text-muted">請點擊下方扭蛋打開獎品！</p>
+          
+          <!-- 顯示扭蛋殼圖片 (capsule.png) -->
+          <div id="capsuleBall" class="capsule-box">
+            <img src="capsule.png" alt="立體扭蛋殼" class="capsule-img">
+          </div>
+          <p class="fw-bold text-primary fs-5">👇 輕點扭蛋開啟獎品</p>
+        </div>
+
+        <!-- 區塊 3：打開扭蛋顯示結果 -->
+        <div id="resultSection" class="card p-4 text-center d-none">
+          <h3 class="text-danger fw-bold">🎊 恭喜獲獎 🎊</h3>
+
+          <!-- 顯示學生學號與姓名 -->
+          <div class="my-2">
+            <div class="user-info-box">
+              👤 抽獎學生：<span id="displayStudentName" class="text-primary"></span> (<span id="displayStudentId"></span>)
+            </div>
+          </div>
+          
+          <!-- 大獎 / 特別獎 標籤 -->
+          <div class="my-2">
+            <span id="prizeCategoryBadge" class="badge fs-6 bg-danger px-3 py-2">大獎</span>
+          </div>
+
+          <!-- 獎品品項名稱 -->
+          <div class="alert alert-warning fs-3 fw-bold my-2" id="prizeNameDisplay">
+            獎品名稱
+          </div>
+
+          <!-- 照片展示區 -->
+          <div class="my-3">
+            <img id="prizeImage" src="" alt="獎品照片" class="prize-image d-none">
+            <div class="text-muted small mt-1">* 圖片僅供參考 *</div>
+          </div>
+
+          <!-- 現場領獎須知 -->
+          <div class="alert alert-info text-start mt-3 mb-0">
+            📍 <strong>現場領獎說明：</strong><br>
+            請保留此頁面並至活動服務台，出示<strong>學生證</strong>向現場工作人員領取獎品！
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbxFGr_HFTpj04n3Vs9iC-9_4DrH6HW47ktu3LSR1NmMz9Flzk2SNFTAs1yp2QhU8oGN/exec";
+    const studentData = JSON.parse(sessionStorage.getItem('student_data'));
+
+    if (!studentData) {
+      alert("請先填寫學生基本資料！");
+      window.location.href = "index.html";
+    } else {
+      document.getElementById('studentGreeting').innerText = `你好，${studentData.name} (${studentData.student_id})`;
+    }
+
+    let drawResultData = null;
+
+    // 點擊開始抽獎
+    document.getElementById('drawBtn').addEventListener('click', async function() {
+      const drawBtn = this;
+      const machine = document.getElementById('gachaponMachine');
+
+      drawBtn.disabled = true;
+      drawBtn.innerText = "扭動中...";
+
+      // 觸發變胖變瘦擠壓動畫
+      machine.classList.add('squash-animation');
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'executeDraw',
+            student_id: studentData.student_id,
+            name: studentData.name,
+            grade: studentData.grade,
+            department: studentData.department
+          })
+        });
+
+        const data = await res.json();
+
+        // 播放動畫 1.8 秒後停止並顯示扭蛋
+        setTimeout(() => {
+          machine.classList.remove('squash-animation');
+          if (data.status === 'success') {
+            drawResultData = data;
+            document.getElementById('drawSection').classList.add('d-none');
+            document.getElementById('ballSection').classList.remove('d-none');
+          } else {
+            alert(`抽獎失敗：${data.message}`);
+            window.location.href = "index.html";
+          }
+        }, 1800);
+
+      } catch (err) {
+        alert("網路連線失敗，請再試一次！");
+        console.error(err);
+        machine.classList.remove('squash-animation');
+        drawBtn.disabled = false;
+        drawBtn.innerText = "🎁 開始抽獎！";
+      }
+    });
+
+    // 點擊扭蛋開啟結果
+    document.getElementById('capsuleBall').addEventListener('click', function() {
+      if (!drawResultData) return;
+
+      document.getElementById('ballSection').classList.add('d-none');
+      document.getElementById('resultSection').classList.remove('d-none');
+
+      // 1. 填入學號與姓名
+      document.getElementById('displayStudentName').innerText = studentData.name;
+      document.getElementById('displayStudentId').innerText = studentData.student_id;
+
+      // 2. 顯示獎品品項名稱
+      document.getElementById('prizeNameDisplay').innerText = drawResultData.prize.name;
+
+      // 3. 判斷顯示：大獎顯示「大獎」，其他顯示「特別獎」
+      const category = drawResultData.prize.category;
+      const badge = document.getElementById('prizeCategoryBadge');
+      
+      if (category === '大獎') {
+        badge.innerText = '大獎';
+        badge.className = 'badge fs-6 bg-danger px-3 py-2';
+      } else {
+        badge.innerText = '特別獎';
+        badge.className = 'badge fs-6 bg-warning text-dark px-3 py-2';
+      }
+
+      // 4. 自動對應載入圖片 (.jpg, .webp, .png)
+      const prizeId = drawResultData.prize.prize_id;
+      const imgElem = document.getElementById('prizeImage');
+      
+      const formats = ['jpg', 'webp', 'png'];
+      let currentFormatIndex = 0;
+
+      function tryLoadImage() {
+        if (currentFormatIndex >= formats.length) {
+          imgElem.classList.add('d-none');
+          return;
+        }
+        imgElem.src = `images/${prizeId}.${formats[currentFormatIndex]}`;
+        imgElem.classList.remove('d-none');
+      }
+
+      imgElem.onerror = function() {
+        currentFormatIndex++;
+        tryLoadImage();
+      };
+
+      tryLoadImage();
+    });
+  </script>
+</body>
+</html>
