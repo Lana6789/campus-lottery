@@ -204,7 +204,7 @@
 
         const data = await res.json();
 
-        // 播放動畫 1.8 秒後停止並顯示扭蛋
+        // 播放動畫 100 毫秒後停止並顯示扭蛋
         setTimeout(() => {
           machine.classList.remove('squash-animation');
           if (data.status === 'success') {
@@ -215,7 +215,7 @@
             alert(`抽獎失敗：${data.message}`);
             window.location.href = "index.html";
           }
-        }, 1800);
+        }, 100);
 
       } catch (err) {
         alert("網路連線失敗，請再試一次！");
