@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>線上抽獎 - 校內集章抽獎系統</title>
+  <title id="htmlTitle">線上抽獎 - 校內集章抽獎系統</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body {
       background: repeating-conic-gradient(from 0deg, #f5f5f5 0deg 15deg, #e0e0e0 15deg 30deg);
-      font-family: "Microsoft JhengHei", sans-serif;
+      font-family: "Microsoft JhengHei", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       min-height: 100vh;
     }
     .card {
@@ -88,23 +88,43 @@
       background-color: #f8f9fa;
       border: 1px dashed #6c757d;
       border-radius: 10px;
-      padding: 8px 12px;
+      padding: 8px 14px;
       font-weight: bold;
       color: #333;
       display: inline-block;
+    }
+
+    .lang-btn-group .btn {
+      font-size: 0.85rem;
+      padding: 4px 10px;
+    }
+
+    /* 抽獎公告卡片高亮樣式 */
+    .announcement-card {
+      background: linear-gradient(135deg, #eef4ff 0%, #e0edff 100%);
+      border: 1px solid #b6d4fe;
+      border-radius: 12px;
     }
   </style>
 </head>
 <body>
 
-  <div class="container py-5">
+  <div class="container py-4">
     <div class="row justify-content-center">
       <div class="col-md-6">
+
+        <!-- 語言切換按鈕 -->
+        <div class="d-flex justify-content-end mb-3">
+          <div class="btn-group shadow-sm lang-btn-group" role="group" aria-label="Language selector">
+            <button type="button" class="btn btn-primary" id="btnZh">中文</button>
+            <button type="button" class="btn btn-outline-primary" id="btnEn">English</button>
+          </div>
+        </div>
 
         <!-- 區塊 1：可愛扭蛋機抽獎 -->
         <div id="drawSection" class="card p-4 text-center">
           <h3 id="studentGreeting" class="fw-bold mb-1 text-danger">載入中...</h3>
-          <p class="text-muted small mb-2">點擊下方按鈕啟動限定扭蛋機！</p>
+          <p class="text-muted small mb-2" id="drawInstruction">點擊下方按鈕啟動限定扭蛋機！</p>
 
           <!-- 扭蛋機機器圖片 (gachapon.png) -->
           <div class="gachapon-wrapper">
@@ -118,24 +138,29 @@
 
         <!-- 區塊 2：掉出透明扭蛋殼，點擊開啟 -->
         <div id="ballSection" class="card p-4 text-center d-none">
-          <h3 class="fw-bold text-danger">🎉 扭蛋跑出來囉！</h3>
-          <p class="text-muted">請點擊下方扭蛋打開獎品！</p>
+          <h3 class="fw-bold text-danger" id="ballTitle">🎉 扭蛋跑出來囉！</h3>
+          <p class="text-muted" id="ballInstruction">請點擊下方扭蛋打開獎品！</p>
           
           <!-- 顯示扭蛋殼圖片 (capsule.png) -->
           <div id="capsuleBall" class="capsule-box">
             <img src="capsule.png" alt="立體扭蛋殼" class="capsule-img">
           </div>
-          <p class="fw-bold text-primary fs-5">👇 輕點扭蛋開啟獎品</p>
+          <p class="fw-bold text-primary fs-5" id="ballTapHint">👇 輕點扭蛋開啟獎品</p>
         </div>
 
         <!-- 區塊 3：打開扭蛋顯示結果 -->
         <div id="resultSection" class="card p-4 text-center d-none">
-          <h3 class="text-danger fw-bold">🎊 恭喜獲獎 🎊</h3>
+          <h3 class="text-danger fw-bold" id="resultTitle">🎊 恭喜獲獎 🎊</h3>
 
-          <!-- 顯示學生學號與姓名 -->
+          <!-- 顯示學生學號、姓名與 IG 帳號 -->
           <div class="my-2">
             <div class="user-info-box">
-              👤 抽獎學生：<span id="displayStudentName" class="text-primary"></span> (<span id="displayStudentId"></span>)
+              <div>
+                👤 <span id="labelStudent">抽獎學生</span>：<span id="displayStudentName" class="text-primary"></span> (<span id="displayStudentId"></span>)
+              </div>
+              <div id="igDisplayWrapper" class="text-muted small mt-1 d-none">
+                📸 IG：<span id="displayStudentIg" class="text-dark fw-bold"></span>
+              </div>
             </div>
           </div>
           
@@ -152,13 +177,21 @@
           <!-- 照片展示區 -->
           <div class="my-3">
             <img id="prizeImage" src="" alt="獎品照片" class="prize-image d-none">
-            <div class="text-muted small mt-1">* 圖片僅供參考 *</div>
+            <div class="text-muted small mt-1" id="imgNoticeText">* 圖片僅供參考 *</div>
           </div>
 
-          <!-- 現場領獎須知 -->
-          <div class="alert alert-info text-start mt-3 mb-0">
-            📍 <strong>現場領獎說明：</strong><br>
-            請保留此頁面並至活動服務台，出示<strong>學生證</strong>向現場工作人員領取獎品！
+          <!-- 最終大獎公告說明區 (取代原先現場領獎須知) -->
+          <div class="alert announcement-card text-start mt-3 mb-0 p-3 shadow-sm">
+            <div class="d-flex align-items-center mb-1">
+              <span class="fs-5 me-2">📢</span>
+              <strong class="fs-6 text-dark" id="noticeTitle">最終大獎抽獎公告</strong>
+            </div>
+            <p class="mb-2 text-secondary" id="noticeBody">
+              最終大獎將於 <strong>12/11</strong> 進行抽獎，結果將公告於 <strong>IG 限時動態</strong>！
+            </p>
+            <div class="text-primary fw-bold small" id="noticeStayTuned">
+              ✨ 持續追蹤鎖定限動，第一手獲獎名單不漏接！
+            </div>
           </div>
         </div>
 
@@ -170,14 +203,115 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbxFGr_HFTpj04n3Vs9iC-9_4DrH6HW47ktu3LSR1NmMz9Flzk2SNFTAs1yp2QhU8oGN/exec";
     const studentData = JSON.parse(sessionStorage.getItem('student_data'));
 
+    // 多語系配置 (i18n)
+    const i18n = {
+      zh: {
+        htmlTitle: "線上抽獎 - 校內集章抽獎系統",
+        greeting: (name, id) => `你好，${name} (${id})`,
+        drawInstruction: "點擊下方按鈕啟動限定扭蛋機！",
+        drawBtn: "🎁 開始抽獎！",
+        drawingBtn: "扭動中...",
+        ballTitle: "🎉 扭蛋跑出來囉！",
+        ballInstruction: "請點擊下方扭蛋打開獎品！",
+        ballTapHint: "👇 輕點扭蛋開啟獎品",
+        resultTitle: "🎊 恭喜獲獎 🎊",
+        labelStudent: "抽獎學生",
+        badgeGrand: "大獎",
+        badgeSpecial: "特別獎",
+        imgNoticeText: "* 圖片僅供參考 *",
+        noticeTitle: "最終大獎抽獎公告",
+        noticeBody: "最終大獎將於 <strong>12/11</strong> 進行抽獎，結果將公告於 <strong>IG 限時動態</strong>！",
+        noticeStayTuned: "✨ 持續追蹤鎖定限動，第一手獲獎名單不漏接！",
+        alertNoData: "請先填寫學生基本資料！",
+        alertDrawFail: "⚠️ 抽獎失敗：",
+        alertNetworkError: "網路連線失敗，請再試一次！"
+      },
+      en: {
+        htmlTitle: "Online Draw - Campus Stamp Rally",
+        greeting: (name, id) => `Hello, ${name} (${id})`,
+        drawInstruction: "Click the button below to start the lucky gachapon!",
+        drawBtn: "🎁 Start Draw!",
+        drawingBtn: "Spinning...",
+        ballTitle: "🎉 A capsule popped out!",
+        ballInstruction: "Tap the capsule below to reveal your prize!",
+        ballTapHint: "👇 Tap capsule to open",
+        resultTitle: "🎊 Congratulations! 🎊",
+        labelStudent: "Participant",
+        badgeGrand: "Grand Prize",
+        badgeSpecial: "Special Prize",
+        imgNoticeText: "* Image for reference only *",
+        noticeTitle: "Grand Prize Drawing Notice",
+        noticeBody: "The Grand Prize will be drawn on <strong>December 11</strong>, and the results will be announced on our <strong>Instagram Stories</strong>!",
+        noticeStayTuned: "✨ Stay tuned and follow our IG so you won't miss the winners announcement!",
+        alertNoData: "Please enter your student information first!",
+        alertDrawFail: "⚠️ Draw failed: ",
+        alertNetworkError: "Network connection failed, please try again!"
+      }
+    };
+
+    let currentLang = localStorage.getItem('lottery_lang') || 'zh';
+    let drawResultData = null;
+
     if (!studentData) {
-      alert("請先填寫學生基本資料！");
+      alert(i18n[currentLang].alertNoData);
       window.location.href = "index.html";
-    } else {
-      document.getElementById('studentGreeting').innerText = `你好，${studentData.name} (${studentData.student_id})`;
     }
 
-    let drawResultData = null;
+    function setLanguage(lang) {
+      currentLang = lang;
+      localStorage.setItem('lottery_lang', lang);
+
+      const t = i18n[lang];
+      document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
+      document.getElementById('htmlTitle').innerText = t.htmlTitle;
+
+      if (studentData) {
+        document.getElementById('studentGreeting').innerText = t.greeting(studentData.name, studentData.student_id);
+      }
+      document.getElementById('drawInstruction').innerText = t.drawInstruction;
+      
+      const drawBtn = document.getElementById('drawBtn');
+      if (!drawBtn.disabled) {
+        drawBtn.innerText = t.drawBtn;
+      }
+
+      document.getElementById('ballTitle').innerText = t.ballTitle;
+      document.getElementById('ballInstruction').innerText = t.ballInstruction;
+      document.getElementById('ballTapHint').innerText = t.ballTapHint;
+
+      document.getElementById('resultTitle').innerText = t.resultTitle;
+      document.getElementById('labelStudent').innerText = t.labelStudent;
+      document.getElementById('imgNoticeText').innerText = t.imgNoticeText;
+
+      document.getElementById('noticeTitle').innerText = t.noticeTitle;
+      document.getElementById('noticeBody').innerHTML = t.noticeBody;
+      document.getElementById('noticeStayTuned').innerHTML = t.noticeStayTuned;
+
+      // 如果已經開出獎品，更新 Badge 標籤語系
+      if (drawResultData && drawResultData.prize) {
+        const badge = document.getElementById('prizeCategoryBadge');
+        if (drawResultData.prize.category === '大獎') {
+          badge.innerText = t.badgeGrand;
+        } else {
+          badge.innerText = t.badgeSpecial;
+        }
+      }
+
+      // 切換按鈕樣式
+      if (lang === 'zh') {
+        document.getElementById('btnZh').className = 'btn btn-primary';
+        document.getElementById('btnEn').className = 'btn btn-outline-primary';
+      } else {
+        document.getElementById('btnZh').className = 'btn btn-outline-primary';
+        document.getElementById('btnEn').className = 'btn btn-primary';
+      }
+    }
+
+    document.getElementById('btnZh').addEventListener('click', () => setLanguage('zh'));
+    document.getElementById('btnEn').addEventListener('click', () => setLanguage('en'));
+
+    // 初始化語系
+    setLanguage(currentLang);
 
     // 點擊開始抽獎
     document.getElementById('drawBtn').addEventListener('click', async function() {
@@ -185,7 +319,7 @@
       const machine = document.getElementById('gachaponMachine');
 
       drawBtn.disabled = true;
-      drawBtn.innerText = "扭動中...";
+      drawBtn.innerText = i18n[currentLang].drawingBtn;
 
       // 觸發變胖變瘦擠壓動畫
       machine.classList.add('squash-animation');
@@ -198,7 +332,8 @@
             student_id: studentData.student_id,
             name: studentData.name,
             grade: studentData.grade,
-            department: studentData.department
+            department: studentData.department,
+            ig_account: studentData.ig_account || ''
           })
         });
 
@@ -212,17 +347,17 @@
             document.getElementById('drawSection').classList.add('d-none');
             document.getElementById('ballSection').classList.remove('d-none');
           } else {
-            alert(`抽獎失敗：${data.message}`);
+            alert(`${i18n[currentLang].alertDrawFail}${data.message}`);
             window.location.href = "index.html";
           }
         }, 100);
 
       } catch (err) {
-        alert("網路連線失敗，請再試一次！");
+        alert(i18n[currentLang].alertNetworkError);
         console.error(err);
         machine.classList.remove('squash-animation');
         drawBtn.disabled = false;
-        drawBtn.innerText = "🎁 開始抽獎！";
+        drawBtn.innerText = i18n[currentLang].drawBtn;
       }
     });
 
@@ -233,22 +368,26 @@
       document.getElementById('ballSection').classList.add('d-none');
       document.getElementById('resultSection').classList.remove('d-none');
 
-      // 1. 填入學號與姓名
+      // 1. 填入學號、姓名與 IG 帳號
       document.getElementById('displayStudentName').innerText = studentData.name;
       document.getElementById('displayStudentId').innerText = studentData.student_id;
+      if (studentData.ig_account) {
+        document.getElementById('displayStudentIg').innerText = studentData.ig_account;
+        document.getElementById('igDisplayWrapper').classList.remove('d-none');
+      }
 
       // 2. 顯示獎品品項名稱
       document.getElementById('prizeNameDisplay').innerText = drawResultData.prize.name;
 
-      // 3. 判斷顯示：大獎顯示「大獎」，其他顯示「特別獎」
+      // 3. 判斷顯示：大獎顯示「大獎 / Grand Prize」，其他顯示「特別獎 / Special Prize」
       const category = drawResultData.prize.category;
       const badge = document.getElementById('prizeCategoryBadge');
       
       if (category === '大獎') {
-        badge.innerText = '大獎';
+        badge.innerText = i18n[currentLang].badgeGrand;
         badge.className = 'badge fs-6 bg-danger px-3 py-2';
       } else {
-        badge.innerText = '特別獎';
+        badge.innerText = i18n[currentLang].badgeSpecial;
         badge.className = 'badge fs-6 bg-warning text-dark px-3 py-2';
       }
 

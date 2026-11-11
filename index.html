@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>校內集章抽獎系統</title>
+  <title id="htmlTitle">校內集章抽獎系統</title>
   <!-- 引入 Bootstrap 5 CSS 樣式庫 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body {
       background-color: #f8f9fa;
-      font-family: "Microsoft JhengHei", sans-serif;
+      font-family: "Microsoft JhengHei", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
     .card {
       border-radius: 15px;
@@ -21,35 +21,54 @@
       padding: 12px;
       font-size: 1.1rem;
     }
+    .lang-btn-group .btn {
+      font-size: 0.85rem;
+      padding: 4px 10px;
+    }
   </style>
 </head>
 <body>
 
-  <div class="container py-5">
+  <div class="container py-4">
     <div class="row justify-content-center">
       <div class="col-md-6">
         
+        <!-- 語言切換按鈕 -->
+        <div class="d-flex justify-content-end mb-3">
+          <div class="btn-group shadow-sm lang-btn-group" role="group" aria-label="Language selector">
+            <button type="button" class="btn btn-primary" id="btnZh">中文</button>
+            <button type="button" class="btn btn-outline-primary" id="btnEn">English</button>
+          </div>
+        </div>
+
         <!-- 標題卡片 -->
         <div class="text-center mb-4">
-          <h2 class="fw-bold text-primary">🎉 校內集章抽獎活動</h2>
-          <p class="text-muted">請填寫基本資料以驗證抽獎資格（一學號限抽一次）</p>
+          <h2 class="fw-bold text-primary" id="pageHeading">🎉 校內集章抽獎活動</h2>
+          <p class="text-muted" id="pageSubheading">請填寫基本資料以驗證抽獎資格（一學號限抽一次）</p>
         </div>
 
         <!-- 學生表單卡片 -->
         <div class="card p-4">
           <form id="studentForm">
+            <!-- 學號 -->
             <div class="mb-3">
-              <label for="student_id" class="form-label fw-bold">學號 <span class="text-danger">*</span></label>
+              <label for="student_id" class="form-label fw-bold" id="labelStudentId">
+                學號 <span class="text-danger">*</span>
+              </label>
               <input type="text" class="form-control" id="student_id" placeholder="例如：S112001" required>
             </div>
 
+            <!-- 姓名 -->
             <div class="mb-3">
-              <label for="name" class="form-label fw-bold">姓名 <span class="text-danger">*</span></label>
+              <label for="name" class="form-label fw-bold" id="labelName">
+                姓名 <span class="text-danger">*</span>
+              </label>
               <input type="text" class="form-control" id="name" placeholder="例如：王小明" required>
             </div>
 
+            <!-- 年級 -->
             <div class="mb-3">
-              <label for="grade" class="form-label fw-bold">年級</label>
+              <label for="grade" class="form-label fw-bold" id="labelGrade">年級</label>
               <select class="form-select" id="grade">
                 <option value="大一">大一</option>
                 <option value="大二">大二</option>
@@ -60,11 +79,25 @@
               </select>
             </div>
 
+            <!-- 科系/系所 -->
             <div class="mb-3">
-              <label for="department" class="form-label fw-bold">科系/系所</label>
+              <label for="department" class="form-label fw-bold" id="labelDepartment">科系/系所</label>
               <input type="text" class="form-control" id="department" placeholder="例如：資訊管理學系">
             </div>
 
+            <!-- Instagram 帳號 (新增欄位) -->
+            <div class="mb-3">
+              <label for="ig_account" class="form-label fw-bold" id="labelIg">
+                Instagram 帳號 <span class="text-danger">*</span>
+              </label>
+              <div class="input-group">
+                <span class="input-group-text">@</span>
+                <input type="text" class="form-control" id="ig_account" placeholder="請輸入 IG 帳號 (例如：your_account)" required>
+              </div>
+              <div class="form-text text-muted" id="hintIg">用於 12/11 最終大獎核對與聯繫</div>
+            </div>
+
+            <!-- 送出按鈕 -->
             <button type="submit" class="btn btn-primary w-100 fw-bold mt-2" id="submitBtn">
               驗證資格並前往抽獎 ➔
             </button>
@@ -79,6 +112,119 @@
     // ⚠️ 請在此處貼上您的 Google Apps Script Web 應用程式 URL
     const API_URL = "https://script.google.com/macros/s/AKfycbxFGr_HFTpj04n3Vs9iC-9_4DrH6HW47ktu3LSR1NmMz9Flzk2SNFTAs1yp2QhU8oGN/exec";
 
+    // 多語系文字設定 (i18n)
+    const i18n = {
+      zh: {
+        htmlTitle: "校內集章抽獎系統",
+        heading: "🎉 校內集章抽獎活動",
+        subheading: "請填寫基本資料以驗證抽獎資格（一學號限抽一次）",
+        labelStudentId: '學號 <span class="text-danger">*</span>',
+        placeholderStudentId: "例如：S112001",
+        labelName: '姓名 <span class="text-danger">*</span>',
+        placeholderName: "例如：王小明",
+        labelGrade: "年級",
+        grades: [
+          { val: "大一", text: "大一" },
+          { val: "大二", text: "大二" },
+          { val: "大三", text: "大三" },
+          { val: "大四", text: "大四" },
+          { val: "碩班", text: "碩班" },
+          { val: "博班", text: "博班" }
+        ],
+        labelDepartment: "科系/系所",
+        placeholderDepartment: "例如：資訊管理學系",
+        labelIg: 'Instagram 帳號 <span class="text-danger">*</span>',
+        placeholderIg: "請輸入 IG 帳號 (例如：your_account)",
+        hintIg: "用於 12/11 最終大獎核對與聯繫",
+        submitBtn: "驗證資格並前往抽獎 ➔",
+        submitting: "驗證資格中...",
+        alertRequired: "請填寫完整的學號、姓名與 IG 帳號！",
+        alertFail: "⚠️ 驗證失敗：",
+        alertError: "發生錯誤：",
+        alertNetwork: "連線後端伺服器失敗，請檢查 API 網址！"
+      },
+      en: {
+        htmlTitle: "Campus Stamp Rally Lucky Draw",
+        heading: "🎉 Campus Stamp Rally Lucky Draw",
+        subheading: "Please fill in your details to verify eligibility (One entry per Student ID)",
+        labelStudentId: 'Student ID <span class="text-danger">*</span>',
+        placeholderStudentId: "e.g., S112001",
+        labelName: 'Full Name <span class="text-danger">*</span>',
+        placeholderName: "e.g., John Doe",
+        labelGrade: "Grade / Year",
+        grades: [
+          { val: "大一", text: "Freshman" },
+          { val: "大二", text: "Sophomore" },
+          { val: "大三", text: "Junior" },
+          { val: "大四", text: "Senior" },
+          { val: "碩班", text: "Master's" },
+          { val: "博班", text: "Ph.D." }
+        ],
+        labelDepartment: "Department",
+        placeholderDepartment: "e.g., Information Management",
+        labelIg: 'Instagram Account <span class="text-danger">*</span>',
+        placeholderIg: "Enter your IG handle (e.g. your_account)",
+        hintIg: "Used for 12/11 Grand Prize verification & contact",
+        submitBtn: "Verify Eligibility & Go to Draw ➔",
+        submitting: "Verifying eligibility...",
+        alertRequired: "Please enter your Student ID, Full Name, and Instagram account!",
+        alertFail: "⚠️ Verification Failed: ",
+        alertError: "Error occurred: ",
+        alertNetwork: "Failed to connect to the server. Please check your connection!"
+      }
+    };
+
+    let currentLang = localStorage.getItem('lottery_lang') || 'zh';
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      localStorage.setItem('lottery_lang', lang);
+
+      const t = i18n[lang];
+      document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
+      document.getElementById('htmlTitle').innerText = t.htmlTitle;
+      document.getElementById('pageHeading').innerText = t.heading;
+      document.getElementById('pageSubheading').innerText = t.subheading;
+
+      document.getElementById('labelStudentId').innerHTML = t.labelStudentId;
+      document.getElementById('student_id').placeholder = t.placeholderStudentId;
+
+      document.getElementById('labelName').innerHTML = t.labelName;
+      document.getElementById('name').placeholder = t.placeholderName;
+
+      document.getElementById('labelGrade').innerText = t.labelGrade;
+      const gradeSelect = document.getElementById('grade');
+      const currentSelectedVal = gradeSelect.value;
+      gradeSelect.innerHTML = t.grades.map(g => `<option value="${g.val}">${g.text}</option>`).join('');
+      gradeSelect.value = currentSelectedVal || "大一";
+
+      document.getElementById('labelDepartment').innerText = t.labelDepartment;
+      document.getElementById('department').placeholder = t.placeholderDepartment;
+
+      document.getElementById('labelIg').innerHTML = t.labelIg;
+      document.getElementById('ig_account').placeholder = t.placeholderIg;
+      document.getElementById('hintIg').innerText = t.hintIg;
+
+      if (!document.getElementById('submitBtn').disabled) {
+        document.getElementById('submitBtn').innerText = t.submitBtn;
+      }
+
+      // 切換按鈕樣式
+      if (lang === 'zh') {
+        document.getElementById('btnZh').className = 'btn btn-primary';
+        document.getElementById('btnEn').className = 'btn btn-outline-primary';
+      } else {
+        document.getElementById('btnZh').className = 'btn btn-outline-primary';
+        document.getElementById('btnEn').className = 'btn btn-primary';
+      }
+    }
+
+    document.getElementById('btnZh').addEventListener('click', () => setLanguage('zh'));
+    document.getElementById('btnEn').addEventListener('click', () => setLanguage('en'));
+
+    // 初始化語系
+    setLanguage(currentLang);
+
     const form = document.getElementById('studentForm');
     const submitBtn = document.getElementById('submitBtn');
 
@@ -89,15 +235,21 @@
       const name = document.getElementById('name').value.trim();
       const grade = document.getElementById('grade').value;
       const department = document.getElementById('department').value.trim();
+      let igAccount = document.getElementById('ig_account').value.trim();
 
-      if (!studentId || !name) {
-        alert("請填寫完整的學號與姓名！");
+      // 如果有輸入 @ 則自動保留乾淨格式或原樣
+      if (igAccount.startsWith('@')) {
+        igAccount = igAccount.substring(1).trim();
+      }
+
+      if (!studentId || !name || !igAccount) {
+        alert(i18n[currentLang].alertRequired);
         return;
       }
 
       // 按鈕顯示載入狀態
       submitBtn.disabled = true;
-      submitBtn.innerText = "驗證資格中...";
+      submitBtn.innerText = i18n[currentLang].submitting;
 
       try {
         // 發送 GET 請求檢查學號資格
@@ -105,30 +257,31 @@
         const data = await res.json();
 
         if (data.status === "already_drawn") {
-          alert(`⚠️ 驗證失敗：${data.message}`);
+          alert(`${i18n[currentLang].alertFail}${data.message}`);
           submitBtn.disabled = false;
-          submitBtn.innerText = "驗證資格並前往抽獎 ➔";
+          submitBtn.innerText = i18n[currentLang].submitBtn;
         } else if (data.status === "eligible") {
           // 資格符合：將學生基本資料暫存至 sessionStorage 供下頁使用
           sessionStorage.setItem('student_data', JSON.stringify({
             student_id: studentId,
             name: name,
             grade: grade,
-            department: department
+            department: department,
+            ig_account: igAccount ? `@${igAccount}` : ''
           }));
 
           // 跳轉至抽獎頁面
           window.location.href = "draw.html";
         } else {
-          alert(`發生錯誤：${data.message}`);
+          alert(`${i18n[currentLang].alertError}${data.message}`);
           submitBtn.disabled = false;
-          submitBtn.innerText = "驗證資格並前往抽獎 ➔";
+          submitBtn.innerText = i18n[currentLang].submitBtn;
         }
       } catch (err) {
-        alert("連線後端伺服器失敗，請檢查 API 網址！");
+        alert(i18n[currentLang].alertNetwork);
         console.error(err);
         submitBtn.disabled = false;
-        submitBtn.innerText = "驗證資格並前往抽獎 ➔";
+        submitBtn.innerText = i18n[currentLang].submitBtn;
       }
     });
   </script>
