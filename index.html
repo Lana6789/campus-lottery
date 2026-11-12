@@ -68,12 +68,16 @@
 
             <!-- 年級 -->
             <div class="mb-3">
-              <label for="grade" class="form-label fw-bold" id="labelGrade">年級</label>
-              <select class="form-select" id="grade">
+              <label for="grade" class="form-label fw-bold" id="labelGrade">
+                年級 <span class="text-danger">*</span>
+              </label>
+              <select class="form-select" id="grade" required>
+                <option value="" disabled selected>請選擇年級</option>
                 <option value="大一">大一</option>
                 <option value="大二">大二</option>
                 <option value="大三">大三</option>
                 <option value="大四">大四</option>
+                <option value="大五含以上">大五含以上</option>
                 <option value="碩班">碩班</option>
                 <option value="博班">博班</option>
               </select>
@@ -81,8 +85,10 @@
 
             <!-- 科系/系所 -->
             <div class="mb-3">
-              <label for="department" class="form-label fw-bold" id="labelDepartment">科系/系所</label>
-              <input type="text" class="form-control" id="department" placeholder="例如：資訊管理學系">
+              <label for="department" class="form-label fw-bold" id="labelDepartment">
+                科系/系所 <span class="text-danger">*</span>
+              </label>
+              <input type="text" class="form-control" id="department" placeholder="例如：資訊管理學系" required>
             </div>
 
             <!-- Instagram 帳號 (新增欄位) -->
@@ -122,23 +128,25 @@
         placeholderStudentId: "例如：S112001",
         labelName: '姓名 <span class="text-danger">*</span>',
         placeholderName: "例如：王小明",
-        labelGrade: "年級",
+        labelGrade: '年級 <span class="text-danger">*</span>',
+        placeholderGrade: "請選擇年級",
         grades: [
           { val: "大一", text: "大一" },
           { val: "大二", text: "大二" },
           { val: "大三", text: "大三" },
           { val: "大四", text: "大四" },
+          { val: "大五含以上", text: "大五含以上" },
           { val: "碩班", text: "碩班" },
           { val: "博班", text: "博班" }
         ],
-        labelDepartment: "科系/系所",
+        labelDepartment: '科系/系所 <span class="text-danger">*</span>',
         placeholderDepartment: "例如：資訊管理學系",
         labelIg: 'Instagram 帳號 <span class="text-danger">*</span>',
         placeholderIg: "請輸入 IG 帳號 (例如：your_account)",
         hintIg: "用於 12/11 最終大獎核對與聯繫",
         submitBtn: "驗證資格並前往抽獎 ➔",
         submitting: "驗證資格中...",
-        alertRequired: "請填寫完整的學號、姓名與 IG 帳號！",
+        alertRequired: "請完整填寫所有必填欄位（學號、姓名、年級、科系/系所、IG 帳號）！",
         alertFail: "⚠️ 驗證失敗：",
         alertError: "發生錯誤：",
         alertNetwork: "連線後端伺服器失敗，請檢查 API 網址！"
@@ -151,23 +159,25 @@
         placeholderStudentId: "e.g., S112001",
         labelName: 'Full Name <span class="text-danger">*</span>',
         placeholderName: "e.g., John Doe",
-        labelGrade: "Grade / Year",
+        labelGrade: 'Grade / Year <span class="text-danger">*</span>',
+        placeholderGrade: "Select Grade",
         grades: [
           { val: "大一", text: "Freshman" },
           { val: "大二", text: "Sophomore" },
           { val: "大三", text: "Junior" },
           { val: "大四", text: "Senior" },
+          { val: "大五含以上", text: "5th Year & Above" },
           { val: "碩班", text: "Master's" },
           { val: "博班", text: "Ph.D." }
         ],
-        labelDepartment: "Department",
+        labelDepartment: 'Department <span class="text-danger">*</span>',
         placeholderDepartment: "e.g., Information Management",
         labelIg: 'Instagram Account <span class="text-danger">*</span>',
         placeholderIg: "Enter your IG handle (e.g. your_account)",
         hintIg: "Used for 12/11 Grand Prize verification & contact",
         submitBtn: "Verify Eligibility & Go to Draw ➔",
         submitting: "Verifying eligibility...",
-        alertRequired: "Please enter your Student ID, Full Name, and Instagram account!",
+        alertRequired: "Please fill in all required fields (Student ID, Name, Grade, Department, and Instagram account)!",
         alertFail: "⚠️ Verification Failed: ",
         alertError: "Error occurred: ",
         alertNetwork: "Failed to connect to the server. Please check your connection!"
@@ -192,13 +202,16 @@
       document.getElementById('labelName').innerHTML = t.labelName;
       document.getElementById('name').placeholder = t.placeholderName;
 
-      document.getElementById('labelGrade').innerText = t.labelGrade;
+      document.getElementById('labelGrade').innerHTML = t.labelGrade;
       const gradeSelect = document.getElementById('grade');
       const currentSelectedVal = gradeSelect.value;
-      gradeSelect.innerHTML = t.grades.map(g => `<option value="${g.val}">${g.text}</option>`).join('');
-      gradeSelect.value = currentSelectedVal || "大一";
+      gradeSelect.innerHTML = `<option value="" disabled ${!currentSelectedVal ? 'selected' : ''}>${t.placeholderGrade}</option>` +
+        t.grades.map(g => `<option value="${g.val}">${g.text}</option>`).join('');
+      if (currentSelectedVal) {
+        gradeSelect.value = currentSelectedVal;
+      }
 
-      document.getElementById('labelDepartment').innerText = t.labelDepartment;
+      document.getElementById('labelDepartment').innerHTML = t.labelDepartment;
       document.getElementById('department').placeholder = t.placeholderDepartment;
 
       document.getElementById('labelIg').innerHTML = t.labelIg;
@@ -242,7 +255,7 @@
         igAccount = igAccount.substring(1).trim();
       }
 
-      if (!studentId || !name || !igAccount) {
+      if (!studentId || !name || !grade || !department || !igAccount) {
         alert(i18n[currentLang].alertRequired);
         return;
       }
