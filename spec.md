@@ -20,12 +20,14 @@
   * **已抽過**：`{ "status": "already_drawn", "message": "您已經參加過抽獎了！" }`
 
 ### 2.2 執行抽獎 (POST)
-* **請求 Payload**：
+* **請求 Payload** (所有欄位皆為必填，年級支援：大一、大二、大三、大四、大五含以上、碩班、博班)：
   ```json
   {
     "action": "executeDraw",
     "student_id": "S112001",
     "name": "王小明",
     "grade": "大一",
-    "department": "資訊管理學系"
+    "department": "資訊管理學系",
+    "ig_account": "@xiaoming_wang"
   }
+  ```
