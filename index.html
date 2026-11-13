@@ -56,6 +56,7 @@
                 學號 <span class="text-danger">*</span>
               </label>
               <input type="text" class="form-control" id="student_id" placeholder="例如：S112001" required>
+              <div class="form-text text-muted mt-1" id="hintStudentId">若學號填寫錯誤，導致無法領取獎品，本單位恕不負責。</div>
             </div>
 
             <!-- 姓名 -->
@@ -116,7 +117,7 @@
 
   <script>
     // ⚠️ 請在此處貼上您的 Google Apps Script Web 應用程式 URL
-    const API_URL = "https://script.google.com/macros/s/AKfycbxFGr_HFTpj04n3Vs9iC-9_4DrH6HW47ktu3LSR1NmMz9Flzk2SNFTAs1yp2QhU8oGN/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbyJiJXheKY-vBxtEYZvCPZLiklLM6zS7gCs9fO8TfPh4UGQEWE_qUL47LTWwS9J7SUY/exec";
 
     // 多語系文字設定 (i18n)
     const i18n = {
@@ -126,6 +127,7 @@
         subheading: "請填寫基本資料以驗證抽獎資格（一學號限抽一次）",
         labelStudentId: '學號 <span class="text-danger">*</span>',
         placeholderStudentId: "例如：S112001",
+        hintStudentId: "若學號填寫錯誤，導致無法領取獎品，本單位恕不負責。",
         labelName: '姓名 <span class="text-danger">*</span>',
         placeholderName: "例如：王小明",
         labelGrade: '年級 <span class="text-danger">*</span>',
@@ -157,6 +159,7 @@
         subheading: "Please fill in your details to verify eligibility (One entry per Student ID)",
         labelStudentId: 'Student ID <span class="text-danger">*</span>',
         placeholderStudentId: "e.g., S112001",
+        hintStudentId: "If the Student ID is entered incorrectly and the prize cannot be claimed, our organization will not be held responsible.",
         labelName: 'Full Name <span class="text-danger">*</span>',
         placeholderName: "e.g., John Doe",
         labelGrade: 'Grade / Year <span class="text-danger">*</span>',
@@ -198,6 +201,7 @@
 
       document.getElementById('labelStudentId').innerHTML = t.labelStudentId;
       document.getElementById('student_id').placeholder = t.placeholderStudentId;
+      document.getElementById('hintStudentId').innerText = t.hintStudentId;
 
       document.getElementById('labelName').innerHTML = t.labelName;
       document.getElementById('name').placeholder = t.placeholderName;
